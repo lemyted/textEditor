@@ -6,7 +6,23 @@
 #include <time.h>
 
 #define FILE_1 "resources/testFile1.txt"
+#define FILE_2 "resources/testFile2.txt"
+#define FILE_3 "resources/newTestFile%ld.txt"
 #define FAKE_FILE_1 "resources/nonExistantTestFile1.txt"
+#define DIRECTORY_1 "resources"
+
+// Operations
+void test_whenFileExist_createNewFile_error(void) 
+{
+  CU_ASSERT_EQUAL(createNewFile(FILE_1), -1);
+}
+
+void test_whenFileDoesntExist_createNewFile_noError(void) 
+{
+  char path[50];
+  sprintf(path, FILE_3, time(NULL));
+  CU_ASSERT_EQUAL(createNewFile(path), 0);
+}
 
 // Utilities
 void test_ifFileExists_fileExists_true(void) 
@@ -33,35 +49,35 @@ void test_whenFileExist_getFileInfo_noError(void)
   free(info);
 }
 
-// void test_whenFileExist_createNewFile_error(void) 
-// {
-//   CU_ASSERT_EQUAL(createNewFile("resources/testFile1.txt"), -1);
-// }
+void test_whenFileIsDirectory_isDir_true(void) 
+{
+  struct stat *info = getFileInfo(DIRECTORY_1);
+  CU_ASSERT_TRUE(isDir(info));
+  free(info);
+}
 
-// void test_whenFileDoesntExist_createNewFile_noError(void) 
-// {
-//   char path[50];
-//   sprintf(path, "resources/newTestFile%ld.txt", time(NULL));
-//   CU_ASSERT_EQUAL(createNewFile(path), 0);
-// }
+void test_whenFileIsNotDirectory_isDir_false(void) 
+{
+  struct stat *info = getFileInfo(FILE_1);
+  CU_ASSERT_FALSE(isDir(info));
+  free(info);
+}
 
-// void test_whenFileIsDir_isDir_true(void) 
-// {
-//   struct stat *info = getFileInfo("resources/");
-//   CU_ASSERT_TRUE(isDir(info));
-//   free(info);
-// }
-
-// void test_whenFileIsNotDir_isDir_false(void) 
-// {
-//   struct stat *info = getFileInfo("resources/");
-//   CU_ASSERT_FALSE(isDir(info));
-//   free(info);
-// }
+void test_whenFile_getSize_returnSize(void) 
+{
+  struct stat *info = getFileInfo(FILE_2);
+  CU_ASSERT_EQUAL(getSize(info), 5);
+  free(info);
+}
 
 int main(void) 
 {
   CU_initialize_registry();
+  
+  // Operations
+  CU_pSuite suite_createNewFile = CU_add_suite("createNewFile", NULL, NULL);
+  CU_add_test(suite_createNewFile, "test_whenFileExist_createNewFile_error", test_whenFileExist_createNewFile_error);
+  CU_add_test(suite_createNewFile, "test_whenFileDoesntExist_createNewFile_noError", test_whenFileDoesntExist_createNewFile_noError);
 
   // Utilities
   CU_pSuite suite_fileExists = CU_add_suite("fileExists", NULL, NULL);
@@ -72,13 +88,12 @@ int main(void)
   CU_add_test(suite_getFileInfo, "test_whenFileDoesntExist_getFileInfo_error", test_whenFileDoesntExist_getFileInfo_error);
   CU_add_test(suite_getFileInfo, "test_whenFileExist_getFileInfo_noError", test_whenFileExist_getFileInfo_noError);
 
-  // CU_pSuite suite_createNewFile = CU_add_suite("createNewFile", NULL, NULL);
-  // CU_add_test(suite_createNewFile, "test_whenFileExist_createNewFile_error", test_whenFileExist_createNewFile_error);
-  // CU_add_test(suite_createNewFile, "test_whenFileDoesntExist_createNewFile_noError", test_whenFileDoesntExist_createNewFile_noError);
+  CU_pSuite suite_isDir = CU_add_suite("isDir", NULL, NULL);
+  CU_add_test(suite_isDir, "test_whenFileIsDirectory_isDir_true", test_whenFileIsDirectory_isDir_true);
+  CU_add_test(suite_isDir, "test_whenFileIsNotDirectory_isDir_false", test_whenFileIsNotDirectory_isDir_false);
 
-  // CU_pSuite suite_isDir = CU_add_suite("isDir", NULL, NULL);
-  // CU_add_test(suite_isDir, "test_whenFileIsDir_isDir_true", test_whenFileIsDir_isDir_true);
-  // CU_add_test(suite_isDir, "test_whenFileIsDir_isDir_true", test_whenFileIsNotDir_isDir_false);
+  CU_pSuite suite_getSize = CU_add_suite("getSize", NULL, NULL);
+  CU_add_test(suite_getSize, "test_whenFile_getSize_returnSize", test_whenFile_getSize_returnSize);
 
   CU_basic_run_tests();
   CU_cleanup_registry();
