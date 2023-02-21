@@ -30,6 +30,7 @@ int deleteDirectory(char *path);
 
 // Utilities
 void logLongFileError(char *msg, char *path);
+
 void logShortFileError(char *msg, char *path);
 
 int fileExists(char *path);

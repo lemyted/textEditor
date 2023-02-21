@@ -23,28 +23,31 @@ int createNewFile(char *path)
 
 char *readFile(char *path) 
 {
-  if (!fileExists(path)) 
-  {
-    logShortFileError(FILE_NOT_FOUND, path);
-    return NULL;
-  }
+  struct stat *info = getFileInfo(path);
 
-  if (isDir(path)) 
+  if (info == NULL) 
+  {
+    return NULL;
+  } 
+
+  if (isDir(info)) 
   {
     logShortFileError(FILE_IS_DIRECTORY, path);
+    free(info);
     return NULL;
   }
 
   ssize_t nBytesRead;
-  int fileSize = getSize(path);
+  int fileSize = getSize(info);
   int fd = open(path, O_RDONLY);
-  char buffer[fileSize];
+  char *buffer = (char*)malloc(sizeof (char) * (fileSize + 1));
 
   nBytesRead = read(fd, buffer, fileSize);
   
   if (nBytesRead == -1) 
   {
     logLongFileError(CANNOT_READ_FILE, path);
+    free(info);
     return NULL;
   }
 
@@ -53,6 +56,8 @@ char *readFile(char *path)
     logShortFileError(FILE_NOT_READ_ENTIRELY, path);
   }
   
+  buffer[fileSize] = '\0';
+  free(info);
   close(fd);
   return buffer;
 }
@@ -92,7 +97,7 @@ struct stat *getFileInfo(char *path)
     logLongFileError(UNABLE_TO_GET_FILE_INFO, path);
   }
 
-  logShortFileError(FILE_ALREADY_EXISTS, path);
+  logShortFileError(FILE_NOT_FOUND, path);
   return NULL;
 }
 
