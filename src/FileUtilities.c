@@ -5,7 +5,7 @@ int createNewFile(char *path)
 {
   if (fileExists(path)) 
   {
-    logShortFileError(FILE_ALREADY_EXISTS, path);
+    logShortFileError(FILE_ALREADY_EXISTS, path, __LINE__, __FILE__);
     return -1;
   }
 
@@ -13,7 +13,7 @@ int createNewFile(char *path)
 
   if (fd == -1) 
   {
-    logLongFileError(UNABLE_TO_CREATE_FILE, path);
+    logLongFileError(UNABLE_TO_CREATE_FILE, path, __LINE__, __FILE__);
     return -1;
   }
   
@@ -32,7 +32,7 @@ char *readFile(char *path)
 
   if (isDir(info)) 
   {
-    logShortFileError(FILE_IS_DIRECTORY, path);
+    logShortFileError(FILE_IS_DIRECTORY, path, __LINE__, __FILE__);
     free(info);
     return NULL;
   }
@@ -46,14 +46,14 @@ char *readFile(char *path)
   
   if (nBytesRead == -1) 
   {
-    logLongFileError(CANNOT_READ_FILE, path);
+    logLongFileError(CANNOT_READ_FILE, path, __LINE__, __FILE__);
     free(info);
     return NULL;
   }
 
   if (nBytesRead != (ssize_t)fileSize) 
   {
-    logShortFileError(FILE_NOT_READ_ENTIRELY, path);
+    logShortFileError(FILE_NOT_READ_ENTIRELY, path, __LINE__, __FILE__);
   }
   
   buffer[fileSize] = '\0';
@@ -73,7 +73,7 @@ int updateFile(char *path, char *content)
 
   if (isDir(info)) 
   {
-    logShortFileError(FILE_IS_DIRECTORY, path);
+    logShortFileError(FILE_IS_DIRECTORY, path, __LINE__, __FILE__);
     free(info);
     return -1;
   }
@@ -87,22 +87,68 @@ int updateFile(char *path, char *content)
 
   if (nBytesWritten != (ssize_t)contentSize) 
   {
-    logShortFileError(FILE_NOT_WRITTEN_ENTIRELY, path);
+    logShortFileError(FILE_NOT_WRITTEN_ENTIRELY, path, __LINE__, __FILE__);
   }
 
+  free(info);
   close(fd);
   return 0;
 }
 
-// Utilities
-void logLongFileError(char *msg, char *path) 
+int deleteFile(char *path) 
 {
-  fprintf(stderr, msg, __LINE__, __FILE__, path, strerror(errno));
+  if (!fileExists(path)) 
+  {
+    logShortFileError(FILE_NOT_FOUND, path, __LINE__, __FILE__);
+    return -1;
+  }
+
+  int fd = open(path, O_RDWR);
+
+  if (fd == -1) 
+  {
+    logLongFileError(UNABLE_TO_CREATE_FILE, path, __LINE__, __FILE__);
+    return -1;
+  }
+
+  if (unlink(path) == -1) 
+  {
+    logLongFileError(UNABLE_TO_DELETE_FILE, path, __LINE__, __FILE__);
+  }
+  
+  close(fd);
+  return 0;
 }
 
-void logShortFileError(char *msg, char *path) 
+int copyFile(char *originalPath, char *copyPath) 
 {
-  fprintf(stderr, msg, __LINE__, __FILE__, path);
+  char *content = readFile(originalPath);
+
+  if (content == NULL) { return -1; }
+
+  if (createNewFile(copyPath) == -1) { return -1; }
+
+  if (updateFile(copyPath, content) == -1) { return -1; }
+
+  return 0;
+}
+
+int moveFile(char *srcPath, char *destPath) 
+{
+  if (copyFile(srcPath, destPath) == -1) { return -1; }
+  if (deleteFile(srcPath) == -1) { return -1; }
+  return 0;
+}
+
+// Utilities
+void logLongFileError(char *msg, char *path, int line, char *file) 
+{
+  fprintf(stderr, msg, line, file, path, strerror(errno));
+}
+
+void logShortFileError(char *msg, char *path, int line, char *file) 
+{
+  fprintf(stderr, msg, line, file, path);
 }
 
 int fileExists(char *path) 
@@ -126,10 +172,10 @@ struct stat *getFileInfo(char *path)
       return info;
     }
 
-    logLongFileError(UNABLE_TO_GET_FILE_INFO, path);
+    logLongFileError(UNABLE_TO_GET_FILE_INFO, path, __LINE__, __FILE__);
   }
 
-  logShortFileError(FILE_NOT_FOUND, path);
+  logShortFileError(FILE_NOT_FOUND, path, __LINE__, __FILE__);
   return NULL;
 }
 

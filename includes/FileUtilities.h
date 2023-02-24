@@ -3,6 +3,7 @@
 #define CANNOT_ACCESS_FILE "[%d][%s] Cannot access file : %s\n%s\n"
 #define UNABLE_TO_GET_FILE_INFO "[%d][%s] Unable to get file info of : %s\n%s\n"
 #define CANNOT_READ_FILE "[%d][%s] Cannot read file : %s\n%s\n"
+#define UNABLE_TO_DELETE_FILE "[%d][%s] Unable to create file : %s\n%s\n"
 
 // logShortFileError
 #define FILE_NOT_FOUND "[%d][%s] File not found : %s\n"
@@ -22,17 +23,22 @@ int deleteFile(char *path);
 
 int copyFile(char *originalPath, char *copyPath);
 
+int moveFile(char *srcPath, char *destPath);
+
 int createNewDirectory(char *path);
 
 char **readDirectory(char *path);
 
 int deleteDirectory(char *path);
 
+int copyDirectory(char *originalPath, char *copyPath);
+
+
 
 // Utilities
-void logLongFileError(char *msg, char *path);
+void logLongFileError(char *msg, char *path, int line, char *file);
 
-void logShortFileError(char *msg, char *path);
+void logShortFileError(char *msg, char *path, int line, char *file);
 
 int fileExists(char *path);
 
