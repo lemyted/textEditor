@@ -51,7 +51,7 @@ char *readFile(char *path)
     return NULL;
   }
 
-  if (nBytesRead != fileSize) 
+  if (nBytesRead != (ssize_t)fileSize) 
   {
     logShortFileError(FILE_NOT_READ_ENTIRELY, path);
   }
@@ -60,6 +60,38 @@ char *readFile(char *path)
   free(info);
   close(fd);
   return buffer;
+}
+
+int updateFile(char *path, char *content) 
+{
+  struct stat *info = getFileInfo(path);
+
+  if (info == NULL) 
+  {
+    return -1;
+  } 
+
+  if (isDir(info)) 
+  {
+    logShortFileError(FILE_IS_DIRECTORY, path);
+    free(info);
+    return -1;
+  }
+
+  ssize_t nBytesWritten;
+  int contentSize = strlen(content);
+  int fd = open(path, O_WRONLY);
+
+  nBytesWritten = write(fd, content, contentSize);
+  fsync(fd);
+
+  if (nBytesWritten != (ssize_t)contentSize) 
+  {
+    logShortFileError(FILE_NOT_WRITTEN_ENTIRELY, path);
+  }
+
+  close(fd);
+  return 0;
 }
 
 // Utilities

@@ -7,3 +7,7 @@ main:
 
 tests:
 	gcc $(FILE_UTILITIES) $(TESTS) -o textEditorTests -lcunit
+
+debug:
+	gcc $(FILE_UTILITIES) $(TESTS) -o textEditorTests -lcunit -g	
+	gdb textEditorTests

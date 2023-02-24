@@ -9,6 +9,7 @@
 #define FILE_ALREADY_EXISTS "[%d][%s] File already exists : %s\n"
 #define FILE_IS_DIRECTORY "[%d][%s] File is directory : %s\n"
 #define FILE_NOT_READ_ENTIRELY "[%d][%s] File not read entirely : %s\n"
+#define FILE_NOT_WRITTEN_ENTIRELY "[%d][%s] File not written entirely : %s\n"
 
 // Operations
 int createNewFile(char *path);
