@@ -11,6 +11,7 @@
 #define FILE_IS_DIRECTORY "[%d][%s] File is directory : %s\n"
 #define FILE_NOT_READ_ENTIRELY "[%d][%s] File not read entirely : %s\n"
 #define FILE_NOT_WRITTEN_ENTIRELY "[%d][%s] File not written entirely : %s\n"
+#define PATH_IS_NOT_DIRECTORY "[%d][%s] Path is not directory : %s\n"
 
 // Operations
 int createNewFile(char *path);
@@ -24,16 +25,6 @@ int deleteFile(char *path);
 int copyFile(char *originalPath, char *copyPath);
 
 int moveFile(char *srcPath, char *destPath);
-
-int createNewDirectory(char *path);
-
-char **readDirectory(char *path);
-
-int deleteDirectory(char *path);
-
-int copyDirectory(char *originalPath, char *copyPath);
-
-
 
 // Utilities
 void logLongFileError(char *msg, char *path, int line, char *file);
